@@ -33,4 +33,6 @@ collections:
       output: true
       collectionTitle: "Quick Start"
  
-
+gems:
+   - markdown
+   - extractToc
