@@ -1,5 +1,5 @@
 ---
-layout: article_with_toc
+layout: default
 title: Quick Start
 permalink: /quick-start/
 ---
