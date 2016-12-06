@@ -16,7 +16,7 @@ If you are new to ScalaMock or mocking in general we recommend starting with <a 
 <h3>Table of contents</h3>
 <ul class="page-index">
     {% for chapter in site.user_guide %}
-        {% if chapter.relative_path contains "/index.html" %}
+        {% if chapter.relative_path contains "index.html" %}
         {% else %}
             <li>
                 <a href="{{ chapter.permalink }}">{{ chapter.title | remove_first: 'User Guide - ' }} </a>
