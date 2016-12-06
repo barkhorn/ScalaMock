@@ -2,7 +2,7 @@
 title: ScalaMock
 description: "Native scala mocking"
 baseurl: "/ScalaMock" #important: start with /
-url: "http://monosity.com"
+url: ""
 
 # Build settings
 markdown: kramdown
@@ -33,6 +33,3 @@ collections:
       output: true
       collectionTitle: "Quick Start"
  
-gems:
-   - markdown
-   - extractToc
