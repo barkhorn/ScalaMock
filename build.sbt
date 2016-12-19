@@ -1,5 +1,5 @@
 scalaVersion in ThisBuild := "2.10.6"
-crossScalaVersions in ThisBuild := Seq("2.10.6", "2.11.8", "2.12.0")
+crossScalaVersions in ThisBuild := Seq("2.10.6", "2.11.8", "2.12.1")
 
 lazy val scalatest =  "org.scalatest" %% "scalatest" % "3.0.1"
 lazy val specs2 = "org.specs2" %% "specs2-core" % "3.8.6"
@@ -18,6 +18,8 @@ val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   pomIncludeRepository := { _ => false },
   publishArtifact in Test := false,
   licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT")),
+  addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"),
+  scalacOptions += "-P:linter:disable:UnusedParameter+IdenticalStatements",
   pomExtra := (
     <url>http://scalamock.org/</url>
     <scm>

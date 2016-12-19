@@ -41,7 +41,7 @@ class MatchEpsilonTest extends FreeSpec {
     }
     
     "only match numbers" in {
-      assert(!(new MatchEpsilon(1.0) == "foo"))
+      assert(!(new MatchEpsilon(1.0) == "foo"))  // linter:ignore UnlikelyEquality
     }
   }
 }

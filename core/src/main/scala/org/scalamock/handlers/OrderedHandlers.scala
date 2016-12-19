@@ -29,7 +29,7 @@ private[scalamock] class OrderedHandlers extends Handlers {
     def apply(call: Call): Option[Any] = {
       for (i <- currentIndex until handlers.length) {
         val handler = handlers(i)
-        val r = handler.handle(call)
+        val r: Option[Any] = handler.handle(call)
         if (r.isDefined) {
           currentIndex = i
           return r

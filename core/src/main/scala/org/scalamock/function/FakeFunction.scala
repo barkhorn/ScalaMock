@@ -26,7 +26,7 @@ import org.scalamock.context.{MockContext, Call}
 // otherwise linearization will choose the MockFunctionN toString
 trait NiceToString { self: FakeFunction =>
 
-  override def toString = name.name.toString
+  override def toString = name.name
 }
 
 abstract class FakeFunction(protected val mockContext: MockContext, private[scalamock] val name: Symbol) {
@@ -38,7 +38,7 @@ abstract class FakeFunction(protected val mockContext: MockContext, private[scal
 
   def handle(arguments: Product): Any = {
     if (callLog != null) {
-      val call = new Call(this, arguments)
+      val call = Call(this, arguments)
       callLog += call
       expectationContext.handle(call) getOrElse onUnexpected(call)
     } else {

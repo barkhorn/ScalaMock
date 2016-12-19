@@ -20,7 +20,7 @@
 
 package com.example
 
-import scala.math.{atan2, sqrt}
+import scala.math.{atan2, hypot}
  
 class Controller(turtle: Turtle) {
  
@@ -31,15 +31,15 @@ class Controller(turtle: Turtle) {
     val deltaPos = delta(start, end)
  
     turtle.turn(angle(deltaPos) - initialAngle)
-    turtle.penDown
+    turtle.penDown()
     turtle.forward(distance(deltaPos))
   }
  
   def delta(pos1: (Double, Double), pos2: (Double, Double)) = 
     (pos2._1 - pos1._1, pos2._2 - pos1._2)
  
-  def distance(delta: (Double, Double)) = 
-    sqrt(delta._1 * delta._1 + delta._2 * delta._2)
+  def distance(delta: (Double, Double)) =
+    hypot(delta._1, delta._2)
  
   def angle(delta: (Double, Double)) = 
     atan2(delta._2, delta._1)
@@ -50,7 +50,7 @@ class Controller(turtle: Turtle) {
  
     val deltaPos = delta(initialPos, pos)
  
-    turtle.penUp
+    turtle.penUp()
     turtle.turn(angle(deltaPos) - initialAngle)
     turtle.forward(distance(deltaPos))
   }

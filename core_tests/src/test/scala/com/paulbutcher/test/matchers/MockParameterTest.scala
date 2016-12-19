@@ -55,7 +55,7 @@ class MockParameterTest extends FreeSpec with Matchers {
     "compare correctly to a product of non mock parameters" in {
       val p1 = (new MockParameter(42), new MockParameter[String](new MatchAny), new MockParameter[Double](new MatchEpsilon(1.0)))
       val p2 = (42, "foo", 1.0001)
-      assert(p1 == p2)
+      assert(p1 == p2)  // linter:ignore UnlikelyEquality
     }
   }
 }

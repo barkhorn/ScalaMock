@@ -38,13 +38,13 @@ trait AbstractMockFactoryBase extends Mock with MockFunctions with Matchers { th
 trait MockFactoryBase extends AbstractMockFactoryBase with MockContext {
   import scala.language.implicitConversions
 
-  initializeExpectations
+  initializeExpectations()
 
   override protected def withExpectations[T](what: => T): T = {
     if (expectationContext == null) {
       // we don't reset expectations for the first test case to allow
       // defining expectations in Suite scope and writing tests in OneInstancePerTest/isolated style 
-      initializeExpectations
+      initializeExpectations()
     }
 
     try {

@@ -27,9 +27,9 @@ import org.scalatest.FreeSpec
 class MatchAnyTest extends FreeSpec {
 
   "MatchAny should match anything" in {
-    assert(new MatchAny == 1.0)
-    assert(new MatchAny == "")
-    assert(new MatchAny == (0, 42))
-    assert(new MatchAny == List(1, 2, 3))
+    assert(new MatchAny == 1.0) // linter:ignore UnlikelyEquality
+    assert(new MatchAny == "") // linter:ignore UnlikelyEquality
+    assert(new MatchAny == (0, 42)) // linter:ignore UnlikelyEquality
+    assert(new MatchAny == List(1, 2, 3)) // linter:ignore UnlikelyEquality
   }
 }

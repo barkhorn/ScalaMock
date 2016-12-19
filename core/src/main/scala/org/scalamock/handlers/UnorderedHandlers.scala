@@ -26,7 +26,7 @@ private[scalamock] class UnorderedHandlers extends Handlers {
   
   def handle(call: Call): Option[Any] = this.synchronized {
     for (handler <- handlers) {
-      val r = handler.handle(call)
+      val r: Option[Any] = handler.handle(call)
       if (r.isDefined)
         return r
     }
