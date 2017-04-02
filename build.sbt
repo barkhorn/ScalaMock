@@ -1,3 +1,5 @@
+import sbt.inc.Analysis
+
 scalaVersion in ThisBuild := "2.10.6"
 crossScalaVersions in ThisBuild := Seq("2.10.6", "2.11.8", "2.12.1")
 // the default in scala.js is now node.js, and rhino will be unsupported in v1.0
@@ -18,6 +20,12 @@ pomExtra in ThisBuild := {
         <url>http://paulbutcher.com/</url>
       </developer>
     </developers>
+    <contributors>
+      <contributor>
+        <name>ScalaMock Contributors</name>
+        <url>https://github.com/paulbutcher/ScalaMock/graphs/contributors</url>
+      </contributor>
+    </contributors>
 }
 
 lazy val scalatest =  "org.scalatest" %% "scalatest" % "3.0.1"
@@ -39,7 +47,8 @@ lazy val scalaXml = libraryDependencies ++= (
 )
 
 val commonSettings = Defaults.coreDefaultSettings ++ Seq(
-  scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature"),
+  scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature",
+    "-target:jvm-" + (if (scalaVersion.value < "2.11") "1.7" else "1.8")),
   scalacOptions in (Compile, doc) ++= Opts.doc.title("ScalaMock") ++ Opts.doc.version(version.value) ++ Seq("-doc-root-content", "rootdoc.txt", "-version"),
   pomIncludeRepository := { _ => false },
   publishArtifact in Test := false,
@@ -106,19 +115,29 @@ lazy val ScalaMock = crossProject in file(".") settings(
     publishArtifact in (Compile, packageSrc) := false,
     scalaReflect,
     quasiquotes,
+    compile in Compile := Analysis.Empty,
     libraryDependencies ++= Seq(scalatest, specs2)
   ) aggregate(
     `scalamock-core`, core_tests, `scalamock-scalatest-support`, `scalamock-specs2-support`, examples
   ) jsSettings (
-    sources in Compile <<= Seq(`scalamock-core`, `scalamock-scalatest-support`, `scalamock-specs2-support`).map(sources in Compile in _.js).join.map(_.flatten)
+    sources in Compile := (
+      (sources in Compile in `scalamock-core`.js).value
+      ++ (sources in Compile in `scalamock-scalatest-support`.js).value
+      ++ (sources in Compile in `scalamock-specs2-support`.js).value
+    )
   ) jvmSettings (
-    sources in Compile <<= Seq(`scalamock-core`, `scalamock-scalatest-support`, `scalamock-specs2-support`).map(sources in Compile in _.jvm).join.map(_.flatten)
+    sources in Compile := (
+      (sources in Compile in `scalamock-core`.jvm).value
+      ++ (sources in Compile in `scalamock-scalatest-support`.jvm).value
+      ++ (sources in Compile in `scalamock-specs2-support`.jvm).value
+    )
   )
 
 lazy val `ScalaMock-js` = ScalaMock.js
 
 lazy val `ScalaMock-jvm` = ScalaMock.jvm
 
+releaseCrossBuild := true
 releaseProcess := {
   import ReleaseTransformations._
   Seq[ReleaseStep](
@@ -131,8 +150,16 @@ releaseProcess := {
     tagRelease,
     publishArtifacts,
     setNextVersion,
-    commitNextVersion,
-    ReleaseStep(action = releaseStepTask(bintraySyncMavenCentral), enableCrossBuild = true)
+    commitNextVersion//,
+//    ReleaseStep(action = releaseStepTask(bintraySyncMavenCentral), enableCrossBuild = true)
     //  pushChanges
   )
 }
+
+
+lazy val sonatypeCreds = for {
+  u <- Option(System.getenv().get("SONATYPE_USERNAME"))
+  p <- Option(System.getenv().get("SONATYPE_PASSWORD"))
+} yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", u, p)
+
+credentials ++= sonatypeCreds.toSeq
