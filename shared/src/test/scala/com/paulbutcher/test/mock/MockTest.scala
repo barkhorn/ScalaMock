@@ -25,7 +25,6 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FreeSpec, Matchers}
 
 import scala.reflect.ClassTag
-import scala.reflect.runtime.universe.{TypeTag, typeTag}
 import scala.util.{Failure, Try}
 
 import com.paulbutcher.test._
@@ -159,12 +158,11 @@ class MockTest extends FreeSpec with MockFactory with Matchers {
       }
     }
 
-    //! TODO - find a way to make this less ugly
     "match methods with by name parameters" in {
       withExpectations {
         val m = mock[TestTrait]
         val f: (=> Int) => Boolean = { x => x == 1 && x == 2  }
-        ((m.byNameParam _): (=> Int) => String).expects(new FunctionAdapter1(f)).returning("it works")
+        (m.byNameParam _: (=> Int) => String).expects(new FunctionAdapter1(f)).returning("it works")
         var y = 0
         assertResult("it works") { m.byNameParam { y += 1; y } }
       }
@@ -215,16 +213,16 @@ class MockTest extends FreeSpec with MockFactory with Matchers {
       }
     }
 
-    //! TODO - currently doesn't work because we can't override concrete vars
-    "cope with a non-abstract var" ignore {
-      withExpectations {
-        val m = mock[TestTrait]
-        (m.concreteVar_= _).expects("foo")
-        (m.concreteVar _).expects().returning("bar")
-        m.concreteVar = "foo"
-        assertResult("bar") { m.concreteVar }
-      }
-    }
+    // doesn't work because we can't override concrete vars
+//    "cope with a non-abstract var" ignore {
+//      withExpectations {
+//        val m = mock[TestTrait]
+//        (m.concreteVar_= _).expects("foo")
+//        (m.concreteVar _).expects().returning("bar")
+//        m.concreteVar = "foo"
+//        assertResult("bar") { m.concreteVar }
+//      }
+//    }
 
     "cope with a val" in {
       withExpectations {
@@ -260,7 +258,7 @@ class MockTest extends FreeSpec with MockFactory with Matchers {
         val m = mock[TestTrait]
         val e = mock[m.Embedded]
         (m.referencesEmbedded _).expects().returning(e)
-        assertResult(e) { m.referencesEmbedded }
+        assertResult(e) { m.referencesEmbedded() }
       }
     }
 
@@ -272,8 +270,8 @@ class MockTest extends FreeSpec with MockFactory with Matchers {
         val i = mock[e.ATrait]
         (e.innerTraitProjected _).expects().returning(i)
         (e.outerTraitProjected _).expects().returning(o)
-        assertResult(o) { e.outerTraitProjected }
-        assertResult(i) { e.innerTraitProjected }
+        assertResult(o) { e.outerTraitProjected() }
+        assertResult(i) { e.innerTraitProjected() }
       }
     }
 
@@ -285,8 +283,8 @@ class MockTest extends FreeSpec with MockFactory with Matchers {
         val i = mock[e.ATrait]
         (e.innerTrait _).expects().returning(i)
         (e.outerTrait _).expects().returning(o)
-        assertResult(o) { e.outerTrait }
-        assertResult(i) { e.innerTrait }
+        assertResult(o) { e.outerTrait() }
+        assertResult(i) { e.innerTrait() }
       }
     }
 
@@ -306,7 +304,7 @@ class MockTest extends FreeSpec with MockFactory with Matchers {
       }
     }
 
-    //! TODO - fails in 2.11
+    // TODO - fails in 2.11
     // "cope with view bounds" in {
     //   withExpectations {
     //     val m = mock[TestTrait]
@@ -423,13 +421,13 @@ class MockTest extends FreeSpec with MockFactory with Matchers {
 
       val provider = mock[DataProviderComponent]
 
-      (provider.find[User](_: Int)(_: ClassTag[User])) expects (13, *) returning (Failure[User](new Exception()))
+      (provider.find[User](_: Int)(_: ClassTag[User])) expects (13, *) returning Failure[User](new Exception())
       provider.find[User](13) shouldBe a[Failure[_]]
     }
 
     "mock class with nonempty default constructor" in {
       class TestNonEmptyDefaultConstructor(a: Int, b: String, c: AnyRef, d: Any)(aa: String)
-      val m = mock[TestNonEmptyDefaultConstructor]
+      "val m = mock[TestNonEmptyDefaultConstructor]" should compile
     }
 
     // TODO: issue 150 - causes a compiler error
@@ -484,6 +482,12 @@ class MockTest extends FreeSpec with MockFactory with Matchers {
       m.oneParam(42)
       m.twoParams(1, 2)
       m.overloaded(99)
+    }
+
+    // TODO: issue 170
+    "fill in constructor args with type params" ignore withExpectations {
+      class Foo[T: ClassTag]
+      "val mf = mock[Foo[Int]]" should compile
     }
   }
 }

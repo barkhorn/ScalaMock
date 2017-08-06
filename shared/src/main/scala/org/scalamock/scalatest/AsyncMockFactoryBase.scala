@@ -10,7 +10,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait AsyncMockFactoryBase extends MockContext with Mock with MockFunctions with Matchers {
 
-  //! TODO - https://issues.scala-lang.org/browse/SI-5831
+  // see https://issues.scala-lang.org/browse/SI-5831
   implicit val _factory = this
 
   implicit def executionContext: ExecutionContext

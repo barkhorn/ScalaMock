@@ -35,7 +35,6 @@ object MockFunctionFinder {
     val utils = new MacroUtils[c.type](c)
     import utils._
 
-    // todo: JS implementation is needed here
     // mock.getClass().getMethod(name).invoke(obj).asInstanceOf[MockFunctionX[...]]
     def mockedFunctionGetter(obj: Tree, name: Name, targs: List[Type]): c.Expr[M] = {
 //      val method = applyOn(applyOn(obj, "getClass"), "getMethod", literal(mockFunctionName(name, obj.tpe, targs)))
@@ -47,9 +46,9 @@ object MockFunctionFinder {
       tree match {
         case Select(qualifier, name) => mockedFunctionGetter(qualifier, name, targs)
         case Block(stats, expr) => c.Expr[M](Block(stats, transcribeTree(expr).tree)) // see issue #62
-        case Typed(expr, tpt) => transcribeTree(expr)
-        case Function(vparams, body) => transcribeTree(body)
-        case Apply(fun, args) => transcribeTree(fun)
+        case Typed(expr, _) => transcribeTree(expr)
+        case Function(_, body) => transcribeTree(body)
+        case Apply(fun, _) => transcribeTree(fun)
         case TypeApply(fun, args) => transcribeTree(fun, args.map(_.tpe))
         case Ident(fun) => reportError(s"please declare '$fun' as MockFunctionx or StubFunctionx (e.g val $fun: MockFunction1[X, R] = ... if it has 1 parameter)")
         case _ => reportError(
@@ -64,7 +63,7 @@ object MockFunctionFinder {
   // This performs a ridiculously simple-minded overload resolution, but it works well enough for
   // our purposes, and is much easier than trying to backport the implementation that was deleted
   // from the macro API (c.f. https://groups.google.com/d/msg/scala-internals/R1iZXfotqds/3xytfX39U2wJ)
-  //! TODO - replace with official resolveOverloaded if/when it's reinstated
+  // TODO - replace with official resolveOverloaded if/when it's reinstated
   def resolveOverloaded(c: Context)(method: c.universe.TermSymbol, targs: List[c.universe.Type], actuals: List[c.universe.Type]): c.universe.Symbol = {
     val utils = new MacroUtils[c.type](c)
     import utils._
@@ -74,7 +73,7 @@ object MockFunctionFinder {
       // see issue #34
       var these = types1.map(_.dealias)
       var those = types2.map(_.dealias)
-      while (!these.isEmpty && !those.isEmpty && these.head =:= those.head) {
+      while (these.nonEmpty && those.nonEmpty && these.head =:= those.head) {
         these = these.tail
         those = those.tail
       }

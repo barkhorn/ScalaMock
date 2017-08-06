@@ -151,14 +151,14 @@ class OrderingTest extends IsolatedSpec {
   }
 
   it should "fail if unexpected call is made" in {
-    demandExpectationException {
-      inSequence {
-        intFunMock.expects(1).returning(1).anyNumberOfTimes
-        intFunMock.expects(2).returning(2).once
-      }
+    inSequence {
+      intFunMock.expects(1).returning(1).anyNumberOfTimes
+      intFunMock.expects(2).returning(2).once
+    }
 
-      intFunMock(1) shouldBe 1
-      intFunMock(3) // TODO exception should be thrown here
+    intFunMock(1) shouldBe 1
+    demandExpectationException {
+      intFunMock(3)
     }
   }
 

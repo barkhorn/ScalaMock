@@ -26,7 +26,7 @@ import org.scalamock.util.{MacroAdapter, MacroUtils}
 import MacroAdapter.Context
 
 
-//! TODO - get rid of this nasty two-stage construction when https://issues.scala-lang.org/browse/SI-5521 is fixed
+// two-stage construction needed because of https://issues.scala-lang.org/browse/SI-5521
 class MockMaker[C <: Context](val ctx: C) {
   class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, mockName: Option[ctx.Expr[String]]) {
 
@@ -108,7 +108,7 @@ class MockMaker[C <: Context](val ctx: C) {
     def forwarderParamType(t: Type): Tree = t match {
       case TypeRef(pre, sym, args) if sym == JavaRepeatedParamClass =>
         TypeTree(internalTypeRef(pre, RepeatedParamClass, args))
-      case TypeRef(pre, sym, args) if isPathDependentThis(t) =>
+      case TypeRef(_, sym, args) if isPathDependentThis(t) =>
         AppliedTypeTree(Ident(TypeName(sym.name.toString)), args map TypeTree _)
       case _ =>
         TypeTree(t)
@@ -122,9 +122,9 @@ class MockMaker[C <: Context](val ctx: C) {
      *  see issue #24
      */
     def mockParamType(t: Type): Tree = t match {
-      case TypeRef(pre, sym, args) if sym == JavaRepeatedParamClass || sym == RepeatedParamClass =>
+      case TypeRef(_, sym, args) if sym == JavaRepeatedParamClass || sym == RepeatedParamClass =>
         AppliedTypeTree(Ident(typeOf[Seq[_]].typeSymbol), args map TypeTree _)
-      case TypeRef(pre, sym, args) if isPathDependentThis(t) =>
+      case TypeRef(_, sym, args) if isPathDependentThis(t) =>
         AppliedTypeTree(Ident(TypeName(sym.name.toString)), args map TypeTree _)
       case _ =>
         TypeTree(t)
@@ -133,8 +133,8 @@ class MockMaker[C <: Context](val ctx: C) {
     def methodsNotInObject =
       typeToMock.members filter (m => m.isMethod && !isMemberOfObject(m)) map (_.asMethod)
 
-    //! TODO - This is a hack, but it's unclear what it should be instead. See
-    //! https://groups.google.com/d/topic/scala-user/n11V6_zI5go/discussion
+    // TODO - This is a hack, but it's unclear what it should be instead. See
+    // https://groups.google.com/d/topic/scala-user/n11V6_zI5go/discussion
     def resolvedType(m: Symbol): Type =
       m.typeSignatureIn(internalSuperType(internalThisType(typeToMock.typeSymbol), typeToMock))
 
@@ -198,7 +198,7 @@ class MockMaker[C <: Context](val ctx: C) {
     def mockMethod(m: MethodSymbol): ValDef = {
       val mt = resolvedType(m)
       val clazz = classType(paramCount(mt))
-      val types = (paramTypes(mt) map mockParamType _) :+ mockParamType(finalResultType(mt))
+      val types = (paramTypes(mt) map mockParamType) :+ mockParamType(finalResultType(mt))
       val name = applyOn(scalaSymbol, "apply", mockNameGenerator.generateMockMethodName(m, mt))
 
       ValDef(Modifiers(),
@@ -311,7 +311,7 @@ class MockMaker[C <: Context](val ctx: C) {
         !m.asInstanceOf[reflect.internal.HasFlags].hasFlag(reflect.internal.Flags.BRIDGE) &&
         !m.isParamWithDefault && // see issue #43
         (!(m.isStable || m.isAccessor) ||
-          m.asInstanceOf[reflect.internal.HasFlags].isDeferred) //! TODO - stop using internal if/when this gets into the API
+          m.asInstanceOf[reflect.internal.HasFlags].isDeferred) // TODO - stop using internal if/when this gets into the API
     }.toList
     val forwarders = methodsToMock map forwarderImpl
     val mocks = methodsToMock map mockMethod

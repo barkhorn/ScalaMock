@@ -30,22 +30,22 @@ object MockImpl {
 
   def mock[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext]): c.Expr[T] = {
     val maker = MockMaker[T](c)(mockContext, stub = false, mockName = None)
-    maker.make
+    maker.make()
   }
 
   def stub[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext]): c.Expr[T] = {
     val maker = MockMaker[T](c)(mockContext, stub = true, mockName = None)
-    maker.make
+    maker.make()
   }
 
   def mockWithName[T: c.WeakTypeTag](c: Context)(mockName: c.Expr[String])(mockContext: c.Expr[MockContext]): c.Expr[T] = {
     val maker = MockMaker[T](c)(mockContext, stub = false, mockName = Some(mockName))
-    maker.make
+    maker.make()
   }
 
   def stubWithName[T: c.WeakTypeTag](c: Context)(mockName: c.Expr[String])(mockContext: c.Expr[MockContext]): c.Expr[T] = {
     val maker = MockMaker[T](c)(mockContext, stub = true, mockName = Some(mockName))
-    maker.make
+    maker.make()
   }
 
   def MockMaker[T: c.WeakTypeTag](c: Context)(mockContext: c.Expr[MockContext], stub: Boolean, mockName: Option[c.Expr[String]]) = {

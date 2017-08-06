@@ -46,7 +46,7 @@ class JavaMocksTest extends IsolatedSpec {
     assertResult(2) { useBridgeMethod(m, new Integer(6)) } // calls: int compare(Object)
   }
 
-  //! TODO - this is going to have to wait for macro types for a proper solution
+  // TODO - this is going to have to wait for macro types for a proper solution
   //    "cope with Java methods with repeated parameters" in {
   //      withExpectations {
   //        val m = mock[JavaInterface]

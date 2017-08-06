@@ -78,7 +78,7 @@ trait MockFactoryBase extends AbstractMockFactoryBase with MockContext {
   override protected def inSequenceWithLogging[T](what: => T) =
     inContext(new OrderedHandlers(logging = true))(what)
 
-  //! TODO - https://issues.scala-lang.org/browse/SI-5831
+  // see https://issues.scala-lang.org/browse/SI-5831
   implicit val _factory = this
 
   private def initializeExpectations() {
