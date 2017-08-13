@@ -71,7 +71,7 @@ object MockFunctionFinder {
 
     def sameTypes(types1: List[Type], types2: List[Type]) = {
       // see issue #34
-      var these = types1.map(_.dealias)
+      var these = types1.map(_.dealias) // FIXME: this does not actually fill in type parameters?!
       var those = types2.map(_.dealias)
       while (these.nonEmpty && those.nonEmpty && these.head =:= those.head) {
         these = these.tail

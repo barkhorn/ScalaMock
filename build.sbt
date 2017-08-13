@@ -31,7 +31,7 @@ val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   publishArtifact in Test := false
 )
 
-lazy val examples = crossProject in file("examples") settings(
+lazy val examples = project in file("examples") settings(
     commonSettings,
     name := "ScalaMock Examples",
     publishArtifact := false,
@@ -39,11 +39,7 @@ lazy val examples = crossProject in file("examples") settings(
       scalatest % Test,
       specs2 % Test
     )
-  ) dependsOn scalamock
-
-lazy val `examples-js` = examples.js
-
-lazy val `examples-jvm` = examples.jvm
+  ) dependsOn scalamock.jvm
 
 lazy val scalamock = crossProject in file(".") settings(
     commonSettings,
