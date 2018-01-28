@@ -104,3 +104,5 @@ credentials ++= (
     Seq.empty[Def.Setting[_]]
   }
 }
+
+bintrayOrganization := Some("scalamock")
