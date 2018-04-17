@@ -18,44 +18,23 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.paulbutcher.test.matchers
+package org.scalamock.test.scalatest
 
-import org.scalamock.matchers.{MatchAny, MatchEpsilon, MockParameter}
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalamock.scalatest.AsyncMockFactory
+import org.scalatest.{AsyncFlatSpec, Matchers}
+import scala.concurrent.Future
 
-class MockParameterTest extends FreeSpec with Matchers {
-  
-  "A mock parameter should" - {
-    "be equal" - {
-      "if its value is equal" in {
-        new MockParameter(42) shouldBe 42
-      }
-    
-      "with a wildcard" in {
-        new MockParameter[Int](new MatchAny) shouldBe 123
-      }
-    
-      "with an epsilon" in {
-        new MockParameter[Double](new MatchEpsilon(1.0)) shouldBe 1.0001
-      }
-    }
-    
-    "not be equal" - {
-      "with different values" in {
-        new MockParameter(42) should not be 43
-      }
-      
-      "with different types" in {
-       new MockParameter(42) should not be "forty two"
-      }
-    }
+/**
+ *  Tests for issue #215
+ */
+class BasicAsyncTest extends AsyncFlatSpec with Matchers with AsyncMockFactory {
+  trait TestTrait {
+    def foo(): Int
   }
-  
-  "A product of mock parameters should" - {
-    "compare correctly to a product of non mock parameters" in {
-      val p1 = (new MockParameter(42), new MockParameter[String](new MatchAny), new MockParameter[Double](new MatchEpsilon(1.0)))
-      val p2 = (42, "foo", 1.0001)
-      assert(p1 === p2)
-    }
+
+  "AsyncMockFactory" should "work in scalatest async test" in {
+    val mockedTrait = mock[TestTrait]
+    (() => mockedTrait.foo()).expects().returning(42)
+    Future.successful { mockedTrait.foo() shouldBe 42 }
   }
 }

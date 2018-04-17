@@ -7,6 +7,7 @@ import org.scalamock.handlers.UnorderedHandlers
 import org.scalamock.matchers.Matchers
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 trait AsyncMockFactoryBase extends MockContext with Mock with MockFunctions with Matchers {
 
@@ -38,11 +39,17 @@ trait AsyncMockFactoryBase extends MockContext with Mock with MockFunctions with
       initializeExpectations()
     }
 
-    test onComplete (_ => clearExpectations())
-    test map { result =>
+    val testResult = test map { result =>
       verifyExpectations()
       result
     }
+
+    testResult onComplete {
+      case Success(_) => ()
+      case Failure(_) => clearExpectations()
+    }
+
+    testResult
   }
 
   private def verifyExpectations() {

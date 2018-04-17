@@ -44,6 +44,12 @@ lazy val `examples-jvm` = examples.jvm
 
 lazy val scalamock = crossProject in file(".") settings(
     commonSettings,
+    publishTo := Some(
+      if (isSnapshot.value)
+        Opts.resolver.sonatypeSnapshots
+      else
+        Opts.resolver.sonatypeStaging
+    ),
     quasiquotes,
     name := "scalamock",
     publishArtifact in (Compile, packageBin) := true,
@@ -74,11 +80,7 @@ releaseProcess := {
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
-    ReleaseStep(action = Command.process("publishSigned", _), enableCrossBuild = true),
-    setNextVersion,
-    commitNextVersion,
-    ReleaseStep(action = Command.process("sonatypeRelease", _)),
-    pushChanges
+    releaseStepCommand("publishSigned")
   )
 }
 
@@ -105,4 +107,12 @@ credentials ++= (
   }
 }
 
-bintrayOrganization := Some("scalamock")
+version in ThisBuild := {
+  val Snapshot = """(\d+)\.(\d+)\.(\d+)-\d+.*?""".r
+  git.gitDescribedVersion.value.getOrElse("0.0.0-1")match {
+    case Snapshot(maj, min, pat) => s"$maj.${min.toInt + 1}.$pat-SNAPSHOT"
+    case v => v
+  }
+}
+
+isSnapshot in ThisBuild := version.value.endsWith("-SNAPSHOT")

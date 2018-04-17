@@ -18,44 +18,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package com.paulbutcher.test.matchers
+package org.scalamock.test.scalatest
 
-import org.scalamock.matchers.{MatchAny, MatchEpsilon, MockParameter}
-import org.scalatest.{FreeSpec, Matchers}
+import org.scalamock.scalatest.AsyncMockFactory
+import org.scalatest.{AsyncFlatSpec, Matchers}
 
-class MockParameterTest extends FreeSpec with Matchers {
-  
-  "A mock parameter should" - {
-    "be equal" - {
-      "if its value is equal" in {
-        new MockParameter(42) shouldBe 42
-      }
-    
-      "with a wildcard" in {
-        new MockParameter[Int](new MatchAny) shouldBe 123
-      }
-    
-      "with an epsilon" in {
-        new MockParameter[Double](new MatchEpsilon(1.0)) shouldBe 1.0001
-      }
-    }
-    
-    "not be equal" - {
-      "with different values" in {
-        new MockParameter(42) should not be 43
-      }
-      
-      "with different types" in {
-       new MockParameter(42) should not be "forty two"
-      }
+import scala.concurrent.Future
+
+/**
+  * Test to ensure AsyncMockFactory only run test once
+  */
+class AsyncMockFactoryNoDuplicatedRun extends AsyncFlatSpec with Matchers with AsyncMockFactory {
+  trait TestTrait {
+    def mockMethod(): Int
+  }
+
+  class ClassUnderTest(protected val testTrait: TestTrait) {
+    def methodUnderTest(): Future[Int] = {
+      TestCounter.alreadyRun = TestCounter.alreadyRun + 1
+      Future(testTrait.mockMethod())
     }
   }
-  
-  "A product of mock parameters should" - {
-    "compare correctly to a product of non mock parameters" in {
-      val p1 = (new MockParameter(42), new MockParameter[String](new MatchAny), new MockParameter[Double](new MatchEpsilon(1.0)))
-      val p2 = (42, "foo", 1.0001)
-      assert(p1 === p2)
-    }
+
+  object TestCounter {
+    var alreadyRun: Int = 0
+  }
+
+  "AsyncMockFactory" should "run test case provided successfully" in {
+    val mockTrait = mock[TestTrait]
+    val returnVal = 100
+    mockTrait.mockMethod _ expects () returning returnVal
+    val classUnderTest = new ClassUnderTest(mockTrait)
+    classUnderTest.methodUnderTest().map(_ shouldBe returnVal)
+  }
+
+  "AsyncMockFactory" should "have run test case provided only once" in {
+    Future(TestCounter.alreadyRun shouldBe 1)
   }
 }
