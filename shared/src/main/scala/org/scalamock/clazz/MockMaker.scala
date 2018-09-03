@@ -254,8 +254,7 @@ class MockMaker[C <: Context](val ctx: C) {
             Template(
               List(TypeTree(typeToMock)),
               noSelfType,
-              initDef +: members))),
-        callConstructor(New(Ident(anon))))
+              initDef +: members))), q"org.scalamock.clazz.Objenesis.newInstance(classOf[${New(Ident(anon))}])")
 
     /**
      * Class that is responsible for creating mock (and its methods) names so they can be reported on expectations error.
