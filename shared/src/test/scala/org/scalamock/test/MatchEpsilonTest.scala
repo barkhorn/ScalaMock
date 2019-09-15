@@ -18,9 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package org.scalamock.jstests
+package org.scalamock.test
 
-class TestClass {
-  private def pm(x: Int) = x
-  def m(x: Int, y: String) = (x, y)
+import org.scalamock.matchers.MatchEpsilon
+import org.scalatest.FreeSpec
+
+class MatchEpsilonTest extends FreeSpec {
+
+  "MatchEpsilon should" - {
+    "match anything that's close to the given value" in {
+      assert(new MatchEpsilon(1.0) == 1.0)
+      assert(new MatchEpsilon(1.0) == 1.0f)
+      assert(new MatchEpsilon(1.0) == 1.0001)
+      assert(new MatchEpsilon(1.0) == 1.0001f)
+      assert(new MatchEpsilon(1.0) == 1)
+    }
+    
+    "not match anything that's not close enough" in {
+      assert(!(new MatchEpsilon(1.0) == 1.1))
+      assert(!(new MatchEpsilon(1.0) == 0.9))
+    }
+    
+    "only match numbers" in {
+      assert(!(new MatchEpsilon(1.0) == "foo"))
+    }
+  }
 }

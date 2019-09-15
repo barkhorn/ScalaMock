@@ -1,19 +1,18 @@
 import sbtcrossproject.CrossPlugin.autoImport.crossProject
 
-scalaVersion in ThisBuild := "2.11.12"
-crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.8", "2.13.0")
-scalaJSUseRhino in ThisBuild := true
+lazy val ScalaVersions = Seq("2.12.8", "2.11.12", "2.13.0")
+lazy val Scalatest = "org.scalatest" %% "scalatest" % "3.0.8"
+lazy val Specs2 = "org.specs2" %% "specs2-core" % "4.5.1"
 
-lazy val scalatest = "org.scalatest" %% "scalatest" % "3.0.8"
-lazy val specs2 = "org.specs2" %% "specs2-core" % "4.5.1"
+scalaVersion in ThisBuild := ScalaVersions.head
+crossScalaVersions in ThisBuild := ScalaVersions
+scalaJSUseRhino in ThisBuild := true
 
 val commonSettings = Defaults.coreDefaultSettings ++ Seq(
   unmanagedSourceDirectories in Compile ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2L, minor)) =>
-        Some(baseDirectory.value.getParentFile / s"shared/src/main/scala-2.$minor")
-      case _ =>
-        None
+      case Some((2L, minor)) => Some(baseDirectory.value.getParentFile / s"shared/src/main/scala-2.$minor")
+      case _ => None
     }
   },
   scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature", "-Xcheckinit", "-target:jvm-1.8")
@@ -30,9 +29,7 @@ lazy val scalamock = crossProject(JSPlatform, JVMPlatform) in file(".") settings
       Opts.doc.version(version.value) ++ Seq("-doc-root-content", "rootdoc.txt", "-version"),
     libraryDependencies ++= Seq(
       "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-      scalatest % Optional,
-      specs2 % Optional
-    )
+      Scalatest % Optional, Specs2 % Optional)
   )
 
 lazy val `scalamock-js` = scalamock.js
@@ -42,10 +39,7 @@ lazy val examples = crossProject(JSPlatform, JVMPlatform) in file("examples") se
   commonSettings,
   name := "ScalaMock Examples",
   skip in publish := true,
-  libraryDependencies ++= Seq(
-    scalatest % Test,
-    specs2 % Test
-  )
+  libraryDependencies ++= Seq(Scalatest % Test, Specs2 % Test)
 ) dependsOn scalamock
 
 lazy val `examples-js` = examples.js
