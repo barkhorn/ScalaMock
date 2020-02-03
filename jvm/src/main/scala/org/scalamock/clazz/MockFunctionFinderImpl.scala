@@ -23,9 +23,7 @@ package org.scalamock.clazz
 import org.scalamock.util.MacroAdapter
 
 object MockFunctionFinderImpl {
-  import MacroAdapter.Context
-
-  def mockedFunctionGetter[M: c.WeakTypeTag](c: Context)
+  def mockedFunctionGetter[M: c.WeakTypeTag](c: MacroAdapter.Context)
                                             (obj: c.Tree, name: c.Name, targs: List[c.Type], actuals: List[c.universe.Type]): c.Expr[M] = {
     import c.universe._
 

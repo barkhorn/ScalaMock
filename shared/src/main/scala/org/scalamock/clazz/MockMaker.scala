@@ -23,11 +23,10 @@ package org.scalamock.clazz
 import org.scalamock.context.MockContext
 import org.scalamock.function._
 import org.scalamock.util.{MacroAdapter, MacroUtils}
-import MacroAdapter.Context
 
 
 //! TODO - get rid of this nasty two-stage construction when https://issues.scala-lang.org/browse/SI-5521 is fixed
-class MockMaker[C <: Context](val ctx: C) {
+class MockMaker[C <: MacroAdapter.Context](val ctx: C) {
   class MockMakerInner[T: ctx.WeakTypeTag](mockContext: ctx.Expr[MockContext], stub: Boolean, mockName: Option[ctx.Expr[String]]) {
 
     import ctx.universe._
@@ -36,7 +35,6 @@ class MockMaker[C <: Context](val ctx: C) {
     import scala.language.reflectiveCalls
 
     val utils = new MacroUtils[ctx.type](ctx)
-
     import utils._
 
     def mockFunctionClass(paramCount: Int): Type = paramCount match {
@@ -167,7 +165,7 @@ class MockMaker[C <: Context](val ctx: C) {
         case MethodType(_, _) => methodDef(m, methodType, body)
         case PolyType(_, _) => methodDef(m, methodType, body)
         case _ => ctx.abort(ctx.enclosingPosition,
-          s"ScalaMock: Don't know how to handle ${methodType.getClass}. Please open a ticket at https://github.com/paulbutcher/ScalaMock/issues")
+          s"ScalaMock: Don't know how to handle ${methodType.getClass}.")
       }
     }
 
@@ -198,7 +196,7 @@ class MockMaker[C <: Context](val ctx: C) {
     def mockMethod(m: MethodSymbol): ValDef = {
       val mt = resolvedType(m)
       val clazz = classType(paramCount(mt))
-      val types = (paramTypes(mt) map mockParamType _) :+ mockParamType(finalResultType(mt))
+      val types = (paramTypes(mt) map mockParamType) :+ mockParamType(finalResultType(mt))
       val name = applyOn(scalaSymbol, "apply", mockNameGenerator.generateMockMethodName(m, mt))
 
       ValDef(Modifiers(),
@@ -217,7 +215,7 @@ class MockMaker[C <: Context](val ctx: C) {
 
       val constructorArgumentsTypes = primaryConstructorOpt.map { constructor =>
       val constructorTypeContext = constructor.typeSignatureIn(typeToMock)
-      val constructorArguments = constructor.paramss //constructorTypeContext.paramLists
+      val constructorArguments = constructor.paramLists //constructorTypeContext.paramLists
       constructorArguments.map {
           symbols => symbols.map(_.typeSignatureIn(constructorTypeContext))
         }
