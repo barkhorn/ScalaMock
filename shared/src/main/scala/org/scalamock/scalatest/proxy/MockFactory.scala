@@ -28,5 +28,7 @@ import org.scalatest.TestSuite
   * proxy mocking support.
   *
   * See [[org.scalamock]] for overview documentation.
+  * @deprecated Proxy mocks are going to go away
   */
+@deprecated("Proxy mocks are going to go away", "4.5.0")
 trait MockFactory extends AbstractMockFactory with ProxyMockFactory with TestSuite

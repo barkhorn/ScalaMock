@@ -35,11 +35,7 @@ object MockFunctionFinder {
     val utils = new MacroUtils[c.type](c)
     import utils._
 
-    // todo: JS implementation is needed here
-    // mock.getClass().getMethod(name).invoke(obj).asInstanceOf[MockFunctionX[...]]
     def mockedFunctionGetter(obj: Tree, name: Name, targs: List[Type]): c.Expr[M] = {
-//      val method = applyOn(applyOn(obj, "getClass"), "getMethod", literal(mockFunctionName(name, obj.tpe, targs)))
-//      val r = c.Expr[M](castTo(applyOn(method, "invoke", obj), weakTypeOf[M]))
       MockFunctionFinderImpl.mockedFunctionGetter[M](c)(obj, name, targs, actuals)
     }
 
@@ -52,9 +48,7 @@ object MockFunctionFinder {
         case Apply(fun, args) => transcribeTree(fun)
         case TypeApply(fun, args) => transcribeTree(fun, args.map(_.tpe))
         case Ident(fun) => reportError(s"please declare '$fun' as MockFunctionx or StubFunctionx (e.g val $fun: MockFunction1[X, R] = ... if it has 1 parameter)")
-        case _ => reportError(
-          s"ScalaMock: Unrecognised structure: ${showRaw(tree)}." +
-            "Please open a ticket at https://github.com/paulbutcher/ScalaMock/issues")
+        case _ => reportError(s"ScalaMock: Unrecognised structure: ${showRaw(tree)}.")
       }
     }
 
@@ -74,7 +68,7 @@ object MockFunctionFinder {
       // see issue #34
       var these = types1.map(_.dealias)
       var those = types2.map(_.dealias)
-      while (!these.isEmpty && !those.isEmpty && these.head =:= those.head) {
+      while (these.nonEmpty && those.nonEmpty && these.head =:= those.head) {
         these = these.tail
         those = those.tail
       }

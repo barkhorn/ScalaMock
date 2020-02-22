@@ -11,7 +11,9 @@ import scala.reflect.ClassTag
   * val macroMock = mock[Foo]
   * val proxyMock = Proxy.mock[Bar]
   * }}}
+ * @deprecated Proxy mocks are going to go away
   */
+@deprecated("Proxy mocks are going to go away", "4.5.0")
 trait MixedMockFactory extends AbstractMockFactory with MacroMock {
 
   object Proxy extends ProxyMockFactory {
